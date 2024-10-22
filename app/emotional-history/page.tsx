@@ -15,6 +15,7 @@ const emotionEmojis: Record<string, string> = {
   happy: "😊",
   sad: "😢",
   angry: "😡",
+  neutal: "-_-"
 };
 
 // Fetch data using fetch API
