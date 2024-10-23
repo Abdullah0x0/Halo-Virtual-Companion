@@ -12,11 +12,14 @@ const GeminiPage = () => {
     const fetchSummary = async () => {
       try {
         setLoading(true);  // Start loading
-        const response = await fetch("/api/gemini"); // Fetch Gemini summary and insights data
+
+        // Fetch Gemini summary and insights data from the API
+        const response = await fetch("/api/gemini");
         const data = await response.json();
 
-        setSummary(data.summary);  // Set formatted summary in state
-        setInsights(data.insights); // Set formatted insights in state
+        // Set the data returned from the API into state
+        setSummary(data.summary);  
+        setInsights(data.insights);
       } catch (error) {
         console.error("Failed to fetch summary or insights:", error);
         setError("Unable to fetch summary or insights at the moment. Please try again later.");
@@ -64,40 +67,15 @@ const GeminiPage = () => {
           <p className="text-lg leading-relaxed text-red-500">{error}</p>
         ) : (
           <>
-            {/* Render summary and insights as HTML */}
+            {/* Render summary and insights dynamically from API */}
             <div className="text-lg leading-relaxed mb-6 text-gray-800" style={{ lineHeight: "1.75", fontFamily: "'Roboto', sans-serif" }}>
               <h3>Summary:</h3>
-              <p>
-                The user started the conversation feeling good but quickly shared their stress about an upcoming project presentation at CowHacks. 
-                Technical issues with the project were causing them anxiety. They sought advice from the assistant, who recommended taking deep 
-                breaths, visualizing a smooth presentation, reviewing materials, and reminding themselves of their team's hard work. The user 
-                appreciated the suggestions and ended the conversation feeling more prepared and empowered to tackle the challenge.
-              </p>
+              <p dangerouslySetInnerHTML={{ __html: summary }} />
             </div>
 
             <div className="text-lg leading-relaxed mb-6 text-gray-800" style={{ lineHeight: "1.75", fontFamily: "'Roboto', sans-serif" }}>
               <h3>AI-Driven Insights:</h3>
-              <ol>
-                <li>
-                  <b>Manage Stress Effectively:</b> The user expressed feeling stressed about their upcoming presentation. Taking deep breaths 
-                  and visualizing a successful presentation are great techniques to manage anxiety. Encourage the user to practice these 
-                  techniques regularly, not just before the presentation, to build a more resilient mindset.
-                  <br /><b>Action Step:</b> Spend 5 minutes each morning practicing deep breathing and visualization exercises to reduce 
-                  overall stress levels.
-                </li>
-                <li>
-                  <b>Prioritize Preparation:</b> The user mentioned feeling prepared, but also acknowledged potential issues. Reviewing 
-                  materials and anticipating problems will help them feel more confident and equipped to handle unexpected situations.
-                  <br /><b>Action Step:</b> Before the presentation, create a "troubleshooting checklist" for potential issues with their 
-                  project and list possible solutions.
-                </li>
-                <li>
-                  <b>Embrace Teamwork:</b> The user mentioned working on a project but did not explicitly mention involving teammates in 
-                  the problem-solving process. Encouraging teamwork can help to distribute the stress and find solutions collectively.
-                  <br /><b>Action Step:</b> Discuss potential issues and solutions with their team, encouraging everyone to share their 
-                  ideas and expertise.
-                </li>
-              </ol>
+              <ol dangerouslySetInnerHTML={{ __html: insights }} />
             </div>
           </>
         )}

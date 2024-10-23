@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { MongoClient } from 'mongodb';
 
 // Initialize Google Generative AI with your API key
@@ -26,24 +26,18 @@ const readChatHistory = async () => {
 
     // Check if any chat history exists
     if (mostRecentChat.length === 0) {
-      console.log("No chat histories found.");
       return null;  // Return null when no history is found
     }
 
-    // Parse the chat log
-    const parseChatLog = (mostRecentChat: any): string[] => {
-      const chatHistory = mostRecentChat.chatHistory;
-
-      // Filter for relevant messages and map to extract the content
-      const simplifiedLog: string[] = chatHistory
-        .filter((item: any) => item.type === "assistant_message" || item.type === "user_message")
-        .map((item: any) => `${item.type}: ${item.message.content}`);
+    // Extract chat history
+    const chatHistory = mostRecentChat[0].chatHistory;
     
-      return simplifiedLog;
-    };
+    // Filter messages for generating the summary and insights
+    const conversationLog = chatHistory
+      .filter((item: any) => item.type === "assistant_message" || item.type === "user_message")
+      .map((item: any) => `${item.type}: ${item.message.content}`);
 
-    // Return parsed chat log
-    return parseChatLog(mostRecentChat[0]);
+    return conversationLog.join("\n");  // Return the chat log as a string
   } catch (error) {
     console.error('Error reading chat history:', error);
     throw new Error('Failed to read chat history.');
@@ -56,65 +50,45 @@ const readChatHistory = async () => {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const textData = await readChatHistory();
-    console.log("Fetched Chat History:", textData);  // Log the data for debugging
 
-    // Fallback when no chat history is found
-    if (!textData || textData.length === 0) {
+    if (!textData) {
       return res.status(200).json({
         summary: "No conversation data available. Please provide recent conversation history for analysis.",
         insights: "Unable to generate insights without prior conversation history."
       });
     }
     
-    // Create a prompt for user summary generation (summarizing their chat)
+    // Create a prompt for user summary generation
     const summaryPrompt = `
-      Please provide a concise summary of this conversation for the user. Highlight the main points they communicated, focusing on their emotions, concerns, or goals. Keep the summary informative but concise, and ensure it's easy for the user to understand how the conversation developed. Limit to a maximum of 5 sentences. Here is the conversation data: ${textData}.
+      Please provide a concise summary of this conversation for the user. Highlight the main points they communicated, focusing on their emotions, concerns, or goals. Here's the conversation data: ${textData}.
     `;
     
-    // Create a prompt for generating actionable insights based on the conversation
+    // Create a prompt for generating actionable insights
     const insightsPrompt = `
-      Based on the conversation data provided, identify up to three actionable insights for the user. Focus on areas where the user can improve their emotional well-being, productivity, or address any specific concerns raised in the chat. Provide clear, practical steps that the user can take to improve or act on the insights identified. Keep the advice concise and focused on helping the user make tangible improvements. Here's the conversation data: ${textData}.
+      Based on the conversation data, identify up to three actionable insights for the user. Focus on areas where the user can improve their emotional well-being or productivity. Provide clear, practical steps. Here's the conversation data: ${textData}.
     `;
-    
+
     // Use Promise.all to generate summary and insights in parallel
     const [summaryResult, insightsResult] = await Promise.all([
       model.generateContent({
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: summaryPrompt }
-            ],
-          }
-        ]
+        contents: [{ role: 'user', parts: [{ text: summaryPrompt }] }],
       }),
       model.generateContent({
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: insightsPrompt }
-            ],
-          }
-        ]
-      })
+        contents: [{ role: 'user', parts: [{ text: insightsPrompt }] }],
+      }),
     ]);
 
-    // Safely extract the text content from the response
+    // Extract the generated text
     const summaryText = summaryResult?.response?.candidates?.[0]?.content?.parts?.[0]?.text || 'Summary could not be generated';
     const insightsText = insightsResult?.response?.candidates?.[0]?.content?.parts?.[0]?.text || 'Insights could not be generated';
 
-    // Format both the summary and insights with headings before sending the response
-    const formattedSummary = `<h3>Summary:</h3><p>${summaryText}</p>`;
-    const formattedInsights = `<h3>AI-Driven Insights:</h3><p>${insightsText}</p>`;
-
-    // Send both formatted summary and insights in the response
+    // Send formatted summary and insights
     res.status(200).json({ 
-      summary: formattedSummary, 
-      insights: formattedInsights 
+      summary: summaryText, 
+      insights: insightsText 
     });
   } catch (error) {
     console.error('Error generating content or insights:', error);
-    res.status(500).json({ error: `Failed to generate content. Error details: ${error}` });
+    res.status(500).json({ error: 'Failed to generate content. Please try again later.' });
   }
 }
