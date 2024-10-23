@@ -39,9 +39,7 @@ The UI/UX design is dynamic, featuring **dark mode and light mode** options to c
 - **Hume AI**: Empathic Voice Interface and emotional data insights.
 - **Next.js**: Server-side rendering and efficient routing.
 - **GEMINI API**: Conversation history analysis and summarization.
-- **Google Echo**: For voice interactions and summarizing insights.
 - **Spotify API**: Emotion-based music recommendations.
-- **Arize: Phoenix**: For real-time tracking and performance evaluation of AI models.
 - **Computer Vision**: Used for user recognition and motion detection.
 - **Dynamic UI/UX Design with Dark and Light Mode**: Created with React and TypeScript to offer an engaging and intuitive user experience that adapts to user preferences.
 
