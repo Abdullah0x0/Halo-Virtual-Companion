@@ -31,7 +31,6 @@ The UI/UX design is dynamic, featuring **dark mode and light mode** options to c
 - **Emotional Data Visualization**: Hume AI's emotional insights are visualized in a dynamic, easy-to-navigate dashboard to help users track and reflect on their mental health.
 - **User Recognition and Personalized Care**: Uses camera and motion detection to identify users and initiate conversations.
 - **Music Recommendations**: Integrates with the Spotify API to suggest music based on the user’s emotional state.
-- **Arize: Phoenix**: Tracks AI model performance, providing real-time monitoring and analysis to evaluate how well the AI is performing.
 - **Dynamic UI/UX with Dark and Light Mode**: Offers both dark mode and light mode options, creating a visually appealing and responsive interface that enhances user experience.
   
 ## Technologies Used
